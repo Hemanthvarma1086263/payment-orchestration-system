@@ -91,22 +91,34 @@ Client → Controller → Service → Routing → Provider → Database → Idem
 
 ---
 
+## 📥 Input & Output
+
+* **Input:** Payment request JSON containing amount, currency, paymentMethod, and requestId
+* **Output:** Payment response containing id, provider, status, and transaction details
+
+---
+
 ## 🔁 Retry & Failover Logic
 
 * If the selected provider fails:
 
-  * System automatically retries with another provider
-* Ensures higher success rate of transactions
+  * System retries with an alternative provider
+* Improves reliability and success rate
 
 ---
 
 ## 🔒 Idempotency
 
 * Each request contains a unique `requestId`
-* If the same request is sent again:
+* Duplicate requests return the same response instead of creating new records
 
-  * Existing payment is returned
-  * No duplicate record is created
+---
+
+## 🔗 Integration Points
+
+* Routing service integrates with provider services
+* Provider services simulate external payment gateways
+* Service layer interacts with database using JPA
 
 ---
 
@@ -114,6 +126,28 @@ Client → Controller → Service → Routing → Provider → Database → Idem
 
 * **H2 In-Memory Database** used for simplicity
 * Can be replaced with MySQL/PostgreSQL in production
+
+---
+
+## ⚡ Non-Functional Requirements
+
+* System should handle concurrent requests efficiently
+* Ensures reliability using retry and failover mechanisms
+* Idempotency ensures consistency and prevents duplicate transactions
+
+---
+
+## ⚙️ Performance Considerations
+
+* Retry and failover improve transaction success rate
+* In-memory database ensures fast operations during development
+* Can be scaled using distributed caching (Redis)
+
+---
+
+## 🤖 AI Usage
+
+AI tools were used to assist in structuring the application, generating boilerplate code, and improving development speed. All logic was implemented with proper understanding and validation.
 
 ---
 
@@ -128,8 +162,9 @@ test-cases.md
 Includes:
 
 * Sanity tests
-* Negative tests
-* Retry scenarios
+* Regression tests
+* Integration tests
+* Negative scenarios
 * Idempotency validation
 
 ---
@@ -163,6 +198,6 @@ Includes:
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Author Mekala Hemanthvarma
 
 Hemanth Varma
