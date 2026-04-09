@@ -1,0 +1,5 @@
+package com.hemanth.paymentapp.provider;
+
+public class ProviderAService {
+
+}

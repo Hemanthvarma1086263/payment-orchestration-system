@@ -1,0 +1,222 @@
+# Test Cases — Payment Orchestration System
+
+## 🧪 Overview
+
+This document defines all test scenarios for the Payment Orchestration System, including sanity, regression, integration, and negative test cases.
+
+---
+
+## ✅ 1. Sanity Test Cases
+
+### TC_01 — Create Payment (CARD)
+
+* **Input:**
+
+```json
+{
+  "amount": 1000,
+  "currency": "INR",
+  "paymentMethod": "CARD",
+  "requestId": "sanity1"
+}
+```
+
+* **Expected Result:**
+
+  * Payment created successfully
+  * Provider = PROVIDER_A
+  * Status = SUCCESS or FAILED
+
+---
+
+### TC_02 — Create Payment (UPI)
+
+* **Input:**
+
+```json
+{
+  "amount": 500,
+  "currency": "INR",
+  "paymentMethod": "UPI",
+  "requestId": "sanity2"
+}
+```
+
+* **Expected Result:**
+
+  * Payment created successfully
+  * Provider = PROVIDER_B
+  * Status updated correctly
+
+---
+
+### TC_03 — Fetch Payment
+
+* **Input:**
+  GET /payments/{id}
+
+* **Expected Result:**
+
+  * Payment details returned
+  * Status matches stored value
+
+---
+
+## 🔁 2. Retry & Failover Test Cases
+
+### TC_04 — Provider A fails → fallback to B
+
+* **Input:** CARD payment
+* **Expected Result:**
+
+  * Provider A fails
+  * Provider B is triggered
+  * Final status updated
+  * Provider switched to B
+
+---
+
+### TC_05 — Provider B fails → fallback to A
+
+* **Input:** UPI payment
+* **Expected Result:**
+
+  * Provider B fails
+  * Retry happens with Provider A
+  * Final status updated
+
+---
+
+## 🔒 3. Idempotency Test Cases
+
+### TC_06 — Duplicate requestId
+
+* **Input (same request twice):**
+
+```json
+{
+  "amount": 1000,
+  "currency": "INR",
+  "paymentMethod": "CARD",
+  "requestId": "dup123"
+}
+```
+
+* **Expected Result:**
+
+  * Same payment ID returned
+  * No duplicate record created
+
+---
+
+### TC_07 — Different requestId
+
+* **Input:**
+
+```json
+{
+  "amount": 1000,
+  "currency": "INR",
+  "paymentMethod": "CARD",
+  "requestId": "new123"
+}
+```
+
+* **Expected Result:**
+
+  * New payment created
+  * Different ID generated
+
+---
+
+## ❌ 4. Negative Test Cases
+
+### TC_08 — Invalid Payment Method
+
+* **Input:**
+
+```json
+{
+  "amount": 1000,
+  "currency": "INR",
+  "paymentMethod": "BITCOIN",
+  "requestId": "invalid1"
+}
+```
+
+* **Expected Result:**
+
+  * Provider = UNKNOWN
+  * Status = FAILED
+
+---
+
+### TC_09 — Missing Amount
+
+* **Input:**
+
+```json
+{
+  "currency": "INR",
+  "paymentMethod": "CARD",
+  "requestId": "invalid2"
+}
+```
+
+* **Expected Result:**
+
+  * Request fails or handled with error response
+
+---
+
+### TC_10 — Null requestId
+
+* **Input:**
+
+```json
+{
+  "amount": 500,
+  "currency": "INR",
+  "paymentMethod": "UPI",
+  "requestId": null
+}
+```
+
+* **Expected Result:**
+
+  * New payment created each time
+  * Idempotency not applied
+
+---
+
+## 🔄 5. Regression Test Cases
+
+### TC_11 — End-to-End Regression
+
+* Create payment → Fetch payment
+* Verify:
+
+  * Routing is correct
+  * Status is correct
+  * Idempotency still works
+
+---
+
+## 🔗 6. Integration Test Cases
+
+### TC_12 — Full Flow Validation
+
+* **Steps:**
+
+  1. Create payment
+  2. Routing applied
+  3. Provider called
+  4. Status updated
+  5. Fetch payment
+
+* **Expected Result:**
+
+  * Complete flow works correctly
+  * Data is consistent across layers
+
+---

@@ -1,0 +1,51 @@
+package com.hemanth.paymentapp.Service;
+
+import com.hemanth.paymentapp.Entity.Payment;
+import com.hemanth.paymentapp.routing.RoutingService;
+import com.hemanth.paymentapp.repository.PaymentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+import com.hemanth.paymentapp.provider.ProviderAService;
+import com.hemanth.paymentapp.provider.ProviderBService;
+@Service
+public class PaymentService {
+	
+	@Autowired
+	private RoutingService routingService;
+	@Autowired
+	private ProviderAService providerAService;
+
+	@Autowired
+	private ProviderBService providerBService;
+
+	 @Autowired
+	    private PaymentRepository paymentRepository;
+
+	    public Payment createPayment(Payment payment) {
+	        payment.setStatus("CREATED");
+	        payment.setCreatedAt(LocalDateTime.now());
+
+	        // Step 1: Routing
+	        String provider = routingService.route(payment.getPaymentMethod());
+	        payment.setProvider(provider);
+
+	        // Step 2: Call provider
+	        String result;
+
+	        if ("PROVIDER_A".equals(provider)) {
+	            result = providerAService.processPayment();
+	        } else if ("PROVIDER_B".equals(provider)) {
+	            result = providerBService.processPayment();
+	        } else {
+	            result = "FAILED";
+	        }
+
+	        // Step 3: Update status
+	        payment.setStatus(result);
+
+	        return paymentRepository.save(payment);
+	    }
+}

@@ -1,0 +1,76 @@
+package com.hemanth.paymentapp.Service;
+
+import com.hemanth.paymentapp.Entity.Payment;
+import com.hemanth.paymentapp.routing.RoutingService;
+import com.hemanth.paymentapp.repository.PaymentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+import com.hemanth.paymentapp.provider.ProviderAService;
+import com.hemanth.paymentapp.provider.ProviderBService;
+@Service
+public class PaymentService {
+	
+	@Autowired
+	private RoutingService routingService;
+	@Autowired
+	private ProviderAService providerAService;
+
+	@Autowired
+	private ProviderBService providerBService;
+
+	 @Autowired
+	    private PaymentRepository paymentRepository;
+
+	    public Payment createPayment(Payment payment) {
+	        payment.setStatus("CREATED");
+	        payment.setCreatedAt(LocalDateTime.now());
+
+	        // Step 1: Routing
+	        String provider = routingService.route(payment.getPaymentMethod());
+	        payment.setProvider(provider);
+
+	        // Step 2: Call provider
+	        String result;
+
+	        if ("PROVIDER_A".equals(provider)) {
+
+	            result = providerAService.processPayment();
+
+	            // 🔥 Retry with B if failed
+	            if ("FAILED".equals(result)) {
+	                result = providerBService.processPayment();
+	                payment.setProvider("PROVIDER_B"); // switched
+	            }
+
+	        } else if ("PROVIDER_B".equals(provider)) {
+
+	            result = providerBService.processPayment();
+
+	            // 🔥 Retry with A if failed
+	            if ("FAILED".equals(result)) {
+	                result = providerAService.processPayment();
+	                payment.setProvider("PROVIDER_A"); // switched
+	            }
+
+	        } else {
+	            result = "FAILED";
+	        }
+
+	        // Step 3: Update status
+	      
+
+	        return paymentRepository.save(payment);
+	    }
+	        
+	        
+	        
+	        public Payment getPayment(Long id) {
+	            Optional<Payment> payment = paymentRepository.findById(id);
+	            return payment.orElse(null);
+	        
+	        
+	    }
+}

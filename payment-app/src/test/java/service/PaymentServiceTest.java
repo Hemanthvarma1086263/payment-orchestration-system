@@ -1,0 +1,58 @@
+package service;
+
+
+import com.hemanth.paymentapp.repository.PaymentRepository;
+import com.hemanth.paymentapp.routing.RoutingService;
+import com.hemanth.paymentapp.Entity.Payment;
+import com.hemanth.paymentapp.Service.PaymentService;
+import com.hemanth.paymentapp.provider.ProviderAService;
+import com.hemanth.paymentapp.provider.ProviderBService;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
+
+class PaymentServiceTest {
+	
+	
+
+	@Test
+	    void testCreatePayment() {
+
+	        // Mock dependencies
+	        PaymentRepository repository = Mockito.mock(PaymentRepository.class);
+	        RoutingService routingService = Mockito.mock(RoutingService.class);
+	        ProviderAService providerA = Mockito.mock(ProviderAService.class);
+	        ProviderBService providerB = Mockito.mock(ProviderBService.class);
+
+	        // Create service manually
+	        PaymentService service = new PaymentService(repository, routingService, providerA, providerB);
+
+	        // Input
+	        Payment payment = new Payment();
+	        payment.setAmount(1000.0);
+	        payment.setPaymentMethod("CARD");
+	        payment.setRequestId("test123");
+
+	        // Mock behavior
+	        Mockito.when(repository.findByRequestId("test123")).thenReturn(Optional.empty());
+	        Mockito.when(routingService.route("CARD")).thenReturn("PROVIDER_A");
+	        Mockito.when(providerA.processPayment()).thenReturn("SUCCESS");
+	        Mockito.when(repository.save(Mockito.any())).thenReturn(payment);
+
+	        // Call method
+	        Payment result = service.createPayment(payment);
+
+	        // Assertions
+	        assertNotNull(result);
+	        assertEquals("SUCCESS", result.getStatus());
+	        assertEquals("PROVIDER_A", result.getProvider());
+	    }
+	}
+
+

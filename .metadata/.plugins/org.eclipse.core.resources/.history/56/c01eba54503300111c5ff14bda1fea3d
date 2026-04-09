@@ -1,0 +1,32 @@
+package com.hemanth.paymentapp.Service;
+
+import com.hemanth.paymentapp.Entity.Payment;
+import com.hemanth.paymentapp.routing.RoutingService;
+import com.hemanth.paymentapp.repository.PaymentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+@Service
+public class PaymentService {
+	@Autowired
+	private RoutingService routingService;
+
+	 @Autowired
+	    private PaymentRepository paymentRepository;
+
+	    public Payment createPayment(Payment payment) {
+	        payment.setStatus("CREATED");
+	        payment.setCreatedAt(LocalDateTime.now());
+	        // 🔥 Routing logic
+	        String provider = routingService.route(payment.getPaymentMethod());
+	        payment.setProvider(provider);
+	        return paymentRepository.save(payment);
+	    }
+
+	    public Payment getPayment(Long id) {
+	        Optional<Payment> payment = paymentRepository.findById(id);
+	        return payment.orElse(null);
+	    }
+}

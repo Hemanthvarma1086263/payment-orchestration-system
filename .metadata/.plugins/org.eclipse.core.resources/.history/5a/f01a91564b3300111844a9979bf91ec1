@@ -1,0 +1,5 @@
+package com.hemanth.paymentapp.Entity;
+
+public class Payment {
+
+}
