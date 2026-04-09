@@ -8,6 +8,24 @@ The system processes payment requests, routes them to appropriate providers, han
 
 ---
 
+📦 Installation
+1. Clone the repository:
+   git clone https://github.com/your-username/payment-orchestration-system.git
+
+2. Navigate to project folder
+
+3. Open in STS / IntelliJ
+
+ ▶️ Execution
+1. Run PaymentAppApplication
+
+2. Application starts on:
+   http://localhost:3000
+
+3. Use Postman to test APIs
+   
+
+
 ## 🏗️ Architecture
 
 ```
@@ -198,6 +216,5 @@ Includes:
 
 ---
 
-## 👨‍💻 Author Mekala Hemanthvarma
-
-Hemanth Varma
+## 👨‍💻 Author 
+Mekala Hemanthvarma
